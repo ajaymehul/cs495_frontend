@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 
 class App extends StatefulWidget {
   @override
@@ -9,6 +14,21 @@ class App extends StatefulWidget {
 class _State extends State<App> {
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+
+  Future<String> getToken() async {
+    print(nameController.text);
+    final body = {
+      'username': nameController.text,
+      'password': passwordController.text,
+    };
+    final jsonString = json.encode(body);
+    final uri = Uri.http('192.168.0.13:3001', '/login');
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = await http.post(uri, headers: headers, body: jsonString);
+
+    Map<String, dynamic> user = jsonDecode(response.body);
+    print('id: ${user['_id']}!');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +90,7 @@ class _State extends State<App> {
                       textColor: Colors.white,
                       color: Colors.blue,
                       child: Text('Login'),
-                      onPressed: () {
-                        print(nameController.text);
-                        print(passwordController.text);
-                      },
+                      onPressed: getToken,
                     )),
                 Container(
                     child: Row(
@@ -85,9 +102,7 @@ class _State extends State<App> {
                             'Sign in',
                             style: TextStyle(fontSize: 20),
                           ),
-                          onPressed: () {
-                            //signup screen
-                          },
+                          onPressed: getToken,
                         )
                       ],
                       mainAxisAlignment: MainAxisAlignment.center,
