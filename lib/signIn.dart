@@ -6,12 +6,12 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 
-class App extends StatefulWidget {
+class SignIn extends StatefulWidget {
   @override
-  _State createState() => _State();
+  _SignInState createState() => _SignInState();
 }
 
-class _State extends State<App> {
+class _SignInState extends State<SignIn> {
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -22,12 +22,28 @@ class _State extends State<App> {
       'password': passwordController.text,
     };
     final jsonString = json.encode(body);
-    final uri = Uri.http('192.168.0.13:3001', '/login');
+    final uri = Uri.http('10.0.0.175:3002', '/login');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.post(uri, headers: headers, body: jsonString);
 
     Map<String, dynamic> user = jsonDecode(response.body);
-    print('id: ${user['_id']}!');
+    print('type: ${user['type']}');
+    if('${user['type']}' == 'manager'){
+      Navigator.of(context)
+          .pushReplacementNamed(
+        "taskManager",
+        // we are passing a value to the settings page
+        arguments: '${user['username']}',
+      );
+    }
+    else if ('${user['type']}' == 'employee'){
+      Navigator.of(context)
+          .pushReplacementNamed(
+        "eView",
+        // we are passing a value to the settings page
+        arguments: '${user['username']}',
+      );
+    }
   }
 
   @override
@@ -76,13 +92,7 @@ class _State extends State<App> {
                     ),
                   ),
                 ),
-                FlatButton(
-                  onPressed: (){
-                    //forgot password screen
-                  },
-                  textColor: Colors.blue,
-                  child: Text('Forgot Password'),
-                ),
+
                 Container(
                     height: 50,
                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -92,21 +102,7 @@ class _State extends State<App> {
                       child: Text('Login'),
                       onPressed: getToken,
                     )),
-                Container(
-                    child: Row(
-                      children: <Widget>[
-                        Text('Does not have account?'),
-                        FlatButton(
-                          textColor: Colors.blue,
-                          child: Text(
-                            'Sign in',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          onPressed: getToken,
-                        )
-                      ],
-                      mainAxisAlignment: MainAxisAlignment.center,
-                    ))
+                SizedBox(height: 30)
               ],
             )));
   }
