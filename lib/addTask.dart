@@ -65,7 +65,7 @@ class MyCustomFormState extends State<MyCustomForm> {
       'shift': shiftController.text
     };
     final jsonString = json.encode(body);
-    final uri = Uri.http('192.168.0.13:3001', '/addTask');
+    final uri = Uri.http('10.0.0.178:3001', '/addTask');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.post(uri, headers: headers, body: jsonString);
   }

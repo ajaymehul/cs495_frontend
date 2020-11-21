@@ -19,7 +19,7 @@ class _TaskManagerState extends State<TaskManager> {
 
   Future fetchTasks() async{
 
-    final uri = Uri.http('10.0.0.175:3002', '/tasks/' + user_id);
+    final uri = Uri.http('10.0.0.178:3002', '/tasks/' + user_id);
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.get(uri, headers: headers);
 
@@ -27,7 +27,7 @@ class _TaskManagerState extends State<TaskManager> {
       tasklist=(json.decode(response.body) as List).map((i) =>
           Task.fromJson(i)).toList();
     });
-
+    print(json.encode(tasklist[0]));
 
   }
 
