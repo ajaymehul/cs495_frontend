@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
+import 'scheduleViewer.dart';
 
 class TaskManager extends StatefulWidget {
   @override
@@ -16,10 +17,9 @@ class _TaskManagerState extends State<TaskManager> {
   List<Task> tasklist;
 
 
-
   Future fetchTasks() async{
 
-    final uri = Uri.http('10.0.0.178:3002', '/tasks/' + user_id);
+    final uri = Uri.http('10.0.0.246:3002', '/tasks/' + user_id);
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.get(uri, headers: headers);
 
@@ -41,18 +41,18 @@ class _TaskManagerState extends State<TaskManager> {
         centerTitle: true,
         title: Text("Task Manager"),
         actions: <Widget>[FlatButton(
-          color: Colors.blue,
+          color: Colors.teal[400],
           textColor: Colors.white,
           disabledColor: Colors.grey,
           disabledTextColor: Colors.black,
           padding: EdgeInsets.all(2.0),
-          splashColor: Colors.blueAccent,
+          splashColor: Colors.teal,
           onPressed: () {
             Navigator.of(context)
                 .pushNamed(
               "addTask",
               // we are passing a value to the settings page
-              arguments: user_id,
+              //arguments: '${user['username']}',
             );
           },
           child: Text(
@@ -62,6 +62,46 @@ class _TaskManagerState extends State<TaskManager> {
         )],
       ),
       body: _myListView(),
+      //navigation bar to switch to scheduling
+      bottomNavigationBar: new Container(
+          height: 60.0,
+          color: Colors.teal[600],
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                //Task button - bold font and darker
+                child: MaterialButton(
+                    color: Colors.teal[800],
+                    textColor: Colors.white,
+                    height: 60,
+                    onPressed: () {
+                      //nothing
+                    },
+                    child: Text('Tasks',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold ),
+                      textAlign: TextAlign.center),
+                ),
+              ),
+              Expanded(
+                //Scheduling button - normal font and lighter
+                child: MaterialButton(
+                  color: Colors.teal[600],
+                  textColor: Colors.white,
+                  height: 60,
+                  onPressed: () { //navigate to scheduling widget
+                    Navigator.of(context)
+                        .pushReplacementNamed(
+                      "scheduler",
+                      // we are passing a value to the settings page
+
+                    );
+                  },
+                  child: Text('Schedules', style: TextStyle(fontSize: 18),textAlign: TextAlign.center),
+                ),
+              ),
+            ],
+          )
+      ),
     );
   }
 
@@ -74,7 +114,7 @@ class _TaskManagerState extends State<TaskManager> {
             child: Column(children: [
               Container(
                   child: Row(children: [
-                    Container(child: CircleAvatar()),
+                    Container(child: CircleAvatar(backgroundColor: Colors.teal[200],)),
                     Column(children: [
                       Text(item.title, style: TextStyle(fontSize: 16.0)),
                       Text(item.role, style: TextStyle(color: Color(4278190080))),

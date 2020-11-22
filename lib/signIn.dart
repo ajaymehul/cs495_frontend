@@ -22,7 +22,7 @@ class _SignInState extends State<SignIn> {
       'password': passwordController.text,
     };
     final jsonString = json.encode(body);
-    final uri = Uri.http('10.0.0.178:3002', '/login');
+    final uri = Uri.http('10.0.0.246:3002', '/login');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.post(uri, headers: headers, body: jsonString);
 

@@ -4,6 +4,7 @@ import 'signIn.dart';
 import 'taskManager.dart';
 import 'addTask.dart';
 import 'eView.dart';
+import 'scheduleViewer.dart';
 
 void main () {
 
@@ -11,11 +12,12 @@ void main () {
       MaterialApp(
         home: SignIn(),
         routes: {
-      "signIn": (BuildContext signInContext) => SignIn(),
-      "taskManager": (BuildContext taskManagerContext) => TaskManager(),
+          "signIn": (BuildContext signInContext) => SignIn(),
+          "taskManager": (BuildContext taskManagerContext) => TaskManager(),
           "addTask": (BuildContext taskManagerContext) => AddTask(),
           "mschedule": (BuildContext taskManagerContext) => SampleBrowser(),
-          "eView": (BuildContext eViewContext) => EmployeeView()
+          "eView": (BuildContext eViewContext) => EmployeeView(),
+          "scheduler" : (BuildContext schedulerContext) => Scheduler()
       },
         initialRoute: "home",
       )
