@@ -93,7 +93,7 @@ class _TaskManagerState extends State<TaskManager> {
                         .pushReplacementNamed(
                       "scheduler",
                       // we are passing a value to the settings page
-
+                      arguments: user_id,
                     );
                   },
                   child: Text('Schedules', style: TextStyle(fontSize: 18),textAlign: TextAlign.center),
