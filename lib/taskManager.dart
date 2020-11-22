@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 import 'scheduleViewer.dart';
+import 'package:percent_indicator/percent_indicator.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class TaskManager extends StatefulWidget {
   @override
@@ -32,9 +34,16 @@ class _TaskManagerState extends State<TaskManager> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchTasks();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     user_id = ModalRoute.of(context).settings.arguments;
-    fetchTasks();
 
     return Scaffold(
       appBar: AppBar(
@@ -105,30 +114,118 @@ class _TaskManagerState extends State<TaskManager> {
     );
   }
 
+
+
   Widget _myListView() {
     return ListView.builder(
+      padding: EdgeInsets.all(15),
       itemCount: tasklist.length,
+      itemBuilder: (context, taskindex) {
+        final Task item = tasklist[taskindex];
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.only(top: 10.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10)
+              ),
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xfffaac7b), Color(0xfff74c83)]),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: Offset(0, 3), // changes position of shadow
+                ),
+              ],
+            ),
+            padding: EdgeInsets.all(10.0),
+            child: Column(
+
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListTile(
+                  title: Center(child: Text(tasklist[taskindex].title,
+                      style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white)))),
+                ),
+                Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center( child: Text(tasklist[taskindex].description,
+                        style: GoogleFonts.josefinSans( textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white70))
+                    ))
+                ),
+                ListTile(
+                  leading: Icon(Icons.assignment_ind),
+                  title: Text("Assigned:",style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white))),
+                  trailing: Text(tasklist[taskindex].assigned,style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white))),
+                ),
+                _mySubTasks(taskindex),
+                Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: new LinearPercentIndicator(
+                    width: MediaQuery.of(context).size.width - 80,
+                    animation: true,
+                    lineHeight: 20.0,
+                    animationDuration: 2000,
+                    percent: percent(taskindex),
+                    center: Text((percent(taskindex)*100).toStringAsFixed(2)+"%"),
+                    linearStrokeCap: LinearStrokeCap.roundAll,
+                    progressColor: Colors.greenAccent,
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  double percent(x){
+    int total = 0;
+    for(int i=0; i<tasklist[x].subTasks.length;i++){
+      if(tasklist[x].subTasks[i].completed) total++;
+    }
+    return total/tasklist[x].subTasks.length;
+  }
+
+  Widget _mySubTasks(x) {
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      itemCount: tasklist[x].subTasks.length,
       itemBuilder: (context, index) {
-        final Task item = tasklist[index];
-        return Card(
-            child: Column(children: [
-              Container(
-                  child: Row(children: [
-                    Container(child: CircleAvatar(backgroundColor: Colors.teal[200],)),
-                    Column(children: [
-                      Text(item.title, style: TextStyle(fontSize: 16.0)),
-                      Text(item.role, style: TextStyle(color: Color(4278190080))),
-                      Text(item.shift, style: TextStyle(color: Color(4278190080)))
-                    ])
-                  ])),
-              SizedBox(height: 10),
-              Container(
-                  child: Column(children: [
-                    Text(
-                        item.description),
-                    Container()
-                  ]))
-            ]));
+        final SubTasks item = tasklist[x].subTasks[index];
+        return Container(
+            margin: const EdgeInsets.only(top: 8.0),
+            decoration: BoxDecoration(
+                color: Color(0xddffffff),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20)
+                )),
+            child:  Container(
+              child: CheckboxListTile(
+
+                title: Text(tasklist[x].subTasks[index].stDesc,  style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Color(0xfff74c66)))),
+                value: tasklist[x].subTasks[index].completed,
+                onChanged: (bool value) {
+                  setState(() {
+                    tasklist[x].subTasks[index].completed = value;
+                  });
+                },
+              ),
+            )
+        );
       },
     );
   }
