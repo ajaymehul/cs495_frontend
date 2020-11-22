@@ -40,6 +40,13 @@ class _TaskManagerState extends State<TaskManager> {
     super.initState();
   }
 
+  Future<void> _handleRefresh() async
+  {
+    await fetchTasks();
+    setState(() {
+
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +79,10 @@ class _TaskManagerState extends State<TaskManager> {
           ),
         )],
       ),
-      body: _myListView(),
+      body: RefreshIndicator(
+          child: _myListView(),
+          onRefresh: () => _handleRefresh(),
+      ),
       //navigation bar to switch to scheduling
       bottomNavigationBar: new Container(
           height: 60.0,

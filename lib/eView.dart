@@ -39,7 +39,13 @@ class _eViewState extends State<EmployeeView> {
     super.initState();
   }
 
+  Future<void> _handleRefresh() async
+  {
+    await fetchTasks();
+    setState(() {
 
+    });
+  }
   @override
   Widget build(BuildContext context) {
     user_id = ModalRoute.of(context).settings.arguments;
@@ -71,7 +77,10 @@ class _eViewState extends State<EmployeeView> {
           ),
         )],
       ),
-      body: _myListView(),
+      body: RefreshIndicator(
+          onRefresh: () => _handleRefresh(),
+          child: _myListView()
+      ),
       //navigation bar to switch to scheduling
       bottomNavigationBar: new Container(
           height: 60.0,
