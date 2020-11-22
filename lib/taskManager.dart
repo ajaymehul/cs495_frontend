@@ -17,11 +17,12 @@ class TaskManager extends StatefulWidget {
 class _TaskManagerState extends State<TaskManager> {
   String user_id = "";
   List<Task> tasklist;
+  bool flag = true;
 
 
   Future fetchTasks() async{
 
-    final uri = Uri.http('10.0.0.246:3002', '/tasks/' + user_id);
+    final uri = Uri.http('10.0.0.246:3002', '/tasks');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.get(uri, headers: headers);
 
@@ -37,25 +38,26 @@ class _TaskManagerState extends State<TaskManager> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchTasks();
   }
 
 
   @override
   Widget build(BuildContext context) {
     user_id = ModalRoute.of(context).settings.arguments;
+    if(flag){
+      flag = false;
+      fetchTasks();
+    }
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Task Manager"),
+        title: Text("Task Manager", style: GoogleFonts.josefinSans()),
         actions: <Widget>[FlatButton(
-          color: Colors.teal[400],
           textColor: Colors.white,
           disabledColor: Colors.grey,
           disabledTextColor: Colors.black,
           padding: EdgeInsets.all(2.0),
-          splashColor: Colors.teal,
           onPressed: () {
             Navigator.of(context)
                 .pushNamed(
@@ -66,7 +68,7 @@ class _TaskManagerState extends State<TaskManager> {
           },
           child: Text(
             "Add Task",
-            style: TextStyle(fontSize: 16.0),
+            style: GoogleFonts.josefinSans( textStyle: TextStyle(fontSize: 16.0)),
           ),
         )],
       ),
@@ -74,28 +76,27 @@ class _TaskManagerState extends State<TaskManager> {
       //navigation bar to switch to scheduling
       bottomNavigationBar: new Container(
           height: 60.0,
-          color: Colors.teal[600],
           child: Row(
             children: <Widget>[
               Expanded(
                 //Task button - bold font and darker
                 child: MaterialButton(
-                    color: Colors.teal[800],
                     textColor: Colors.white,
                     height: 60,
+                    color: Color(0xfee50a80),
                     onPressed: () {
                       //nothing
                     },
                     child: Text('Tasks',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold ),
+                      style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 18 )),
                       textAlign: TextAlign.center),
                 ),
               ),
               Expanded(
                 //Scheduling button - normal font and lighter
                 child: MaterialButton(
-                  color: Colors.teal[600],
                   textColor: Colors.white,
+                  color: Color(0xfff3a2755),
                   height: 60,
                   onPressed: () { //navigate to scheduling widget
                     Navigator.of(context)
@@ -105,7 +106,7 @@ class _TaskManagerState extends State<TaskManager> {
 
                     );
                   },
-                  child: Text('Schedules', style: TextStyle(fontSize: 18),textAlign: TextAlign.center),
+                  child: Text('Schedules', style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 18)),textAlign: TextAlign.center),
                 ),
               ),
             ],
@@ -218,11 +219,7 @@ class _TaskManagerState extends State<TaskManager> {
 
                 title: Text(tasklist[x].subTasks[index].stDesc,  style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Color(0xfff74c66)))),
                 value: tasklist[x].subTasks[index].completed,
-                onChanged: (bool value) {
-                  setState(() {
-                    tasklist[x].subTasks[index].completed = value;
-                  });
-                },
+                onChanged: null,
               ),
             )
         );

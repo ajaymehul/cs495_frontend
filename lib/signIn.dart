@@ -60,7 +60,6 @@ class _SignInState extends State<SignIn> {
                     child: Text(
                       '[Name Placeholder ]',
                       style: TextStyle(
-                          color: Colors.blue,
                           fontWeight: FontWeight.w500,
                           fontSize: 30),
                     )),
@@ -98,7 +97,6 @@ class _SignInState extends State<SignIn> {
                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: RaisedButton(
                       textColor: Colors.white,
-                      color: Colors.blue,
                       child: Text('Login'),
                       onPressed: getToken,
                     )),

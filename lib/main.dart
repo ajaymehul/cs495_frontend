@@ -10,6 +10,11 @@ void main () {
 
   runApp(
       MaterialApp(
+        theme: ThemeData(
+          brightness: Brightness.light,
+          primaryColor: Color(0xfff3a2755),
+          accentColor: Color(0xfffaac7b)
+        ),
         home: SignIn(),
         routes: {
           "signIn": (BuildContext signInContext) => SignIn(),

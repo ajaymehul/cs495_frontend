@@ -1,6 +1,12 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'eTaskManager.dart';
+import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
+import 'scheduleViewer.dart';
+import 'package:percent_indicator/percent_indicator.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class EmployeeView extends StatefulWidget {
   @override
@@ -8,145 +14,301 @@ class EmployeeView extends StatefulWidget {
 }
 
 class _eViewState extends State<EmployeeView> {
-  int _counter = 0;
+  String user_id = "";
+  List<Task> tasklist;
+  bool flag = true;
 
-  void _incrementCounter() {
+
+  Future fetchTasks() async{
+
+    final uri = Uri.http('10.0.0.246:3002', '/tasks/' + user_id);
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = await http.get(uri, headers: headers);
+
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      tasklist=(json.decode(response.body) as List).map((i) =>
+          Task.fromJson(i)).toList();
     });
+    print(json.encode(tasklist[0]));
+
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    user_id = ModalRoute.of(context).settings.arguments;
+    if(flag){
+      flag = false;
+      fetchTasks();
+    }
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text("Task List"),
+        centerTitle: true,
+        title: Text("Task Manager", style: GoogleFonts.josefinSans()),
+        actions: <Widget>[FlatButton(
+          textColor: Colors.white,
+          disabledColor: Colors.grey,
+          disabledTextColor: Colors.black,
+          padding: EdgeInsets.all(2.0),
+          onPressed: () {
+            Navigator.of(context)
+                .pushNamed(
+              "addTask",
+              // we are passing a value to the settings page
+              //arguments: '${user['username']}',
+            );
+          },
+          child: Text(
+            "Add Task",
+            style: GoogleFonts.josefinSans( textStyle: TextStyle(fontSize: 16.0)),
+          ),
+        )],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.all(14.0),
-              height: 300,
-              width: 300,
-              child: Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(width: 5, color: Colors.teal[200])),
-                child: Container(
-                    padding: EdgeInsets.only(top: 15),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.only(bottom: 30, top: 30),
-                          child: Text(
-                            'Name : Bob Marley',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Text('Role : Morning Cashier',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            )),
-                      ],
-                    )),
-              ),
-            ),
-            Card(
-              color: Colors.teal[200],
-              child: InkWell(
-                splashColor: Colors.blue.withAlpha(30),
-                onTap: () {
-                  print('Card tapped.');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => eTaskList()),
-                  );
-                },
-                child: Container(
-                  width: 300,
-                  height: 100,
-                  padding: EdgeInsets.all(30.0),
-                  child: Text(
-                    'Pending Tasks',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25,
-                    ),
-                  ),
+      body: _myListView(),
+      //navigation bar to switch to scheduling
+      bottomNavigationBar: new Container(
+          height: 60.0,
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                //Task button - bold font and darker
+                child: MaterialButton(
+                  textColor: Colors.white,
+                  height: 60,
+                  color: Color(0xfee50a80),
+                  onPressed: () {
+                    //nothing
+                  },
+                  child: Text('Tasks',
+                      style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 18 )),
+                      textAlign: TextAlign.center),
                 ),
               ),
-            ),
-            Card(
-              color: Colors.teal[200],
-              child: InkWell(
-                splashColor: Colors.yellow[100].withAlpha(30),
-                onTap: () {
-                  print('Card tapped.');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => eTaskList()),
-                  );
-                },
-                child: Container(
-                  width: 300,
-                  height: 100,
-                  padding: EdgeInsets.all(30.0),
-                  child: Text(
-                    'Completed Tasks',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
-                  ),
+              Expanded(
+                //Scheduling button - normal font and lighter
+                child: MaterialButton(
+                  textColor: Colors.white,
+                  color: Color(0xfff3a2755),
+                  height: 60,
+                  onPressed: () { //navigate to scheduling widget
+                    Navigator.of(context)
+                        .pushReplacementNamed(
+                      "scheduler",
+                      // we are passing a value to the settings page
+
+                    );
+                  },
+                  child: Text('Schedules', style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 18)),textAlign: TextAlign.center),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          )
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+
+
+  Widget _myListView() {
+    return ListView.builder(
+      padding: EdgeInsets.all(15),
+      itemCount: tasklist.length,
+      itemBuilder: (context, taskindex) {
+        final Task item = tasklist[taskindex];
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.only(top: 10.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(10),
+                  topRight: Radius.circular(10),
+                  bottomLeft: Radius.circular(10),
+                  bottomRight: Radius.circular(10)
+              ),
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xfffaac7b), Color(0xfff74c83)]),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: Offset(0, 3), // changes position of shadow
+                ),
+              ],
+            ),
+            padding: EdgeInsets.all(10.0),
+            child: Column(
+
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListTile(
+                  title: Center(child: Text(tasklist[taskindex].title,
+                      style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white)))),
+                ),
+                Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center( child: Text(tasklist[taskindex].description,
+                        style: GoogleFonts.josefinSans( textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white70))
+                    ))
+                ),
+                ListTile(
+                  leading: Icon(Icons.assignment_ind),
+                  title: Text("Assigned:",style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white))),
+                  trailing: Text(tasklist[taskindex].assigned,style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white))),
+                ),
+                _mySubTasks(taskindex),
+                Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: new LinearPercentIndicator(
+                    width: MediaQuery.of(context).size.width - 80,
+                    animation: true,
+                    lineHeight: 20.0,
+                    animationDuration: 2000,
+                    percent: percent(taskindex),
+                    center: Text((percent(taskindex)*100).toStringAsFixed(2)+"%"),
+                    linearStrokeCap: LinearStrokeCap.roundAll,
+                    progressColor: Colors.greenAccent,
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  double percent(x){
+    int total = 0;
+    for(int i=0; i<tasklist[x].subTasks.length;i++){
+      if(tasklist[x].subTasks[i].completed) total++;
+    }
+    return total/tasklist[x].subTasks.length;
+  }
+
+  Widget _mySubTasks(x) {
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      shrinkWrap: true,
+      itemCount: tasklist[x].subTasks.length,
+      itemBuilder: (context, index) {
+        final SubTasks item = tasklist[x].subTasks[index];
+        return Container(
+            margin: const EdgeInsets.only(top: 8.0),
+            decoration: BoxDecoration(
+                color: Color(0xddffffff),
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20)
+                )),
+            child:  Container(
+              child: CheckboxListTile(
+
+                title: Text(tasklist[x].subTasks[index].stDesc,  style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Color(0xfff74c66)))),
+                value: tasklist[x].subTasks[index].completed,
+                onChanged: (bool value) {
+                  setState(() {
+                    tasklist[x].subTasks[index].completed = value;
+                    editTask(x);
+                  });
+                },
+              ),
+            )
+        );
+      },
+    );
+  }
+
+  Future editTask(int task_no) async{
+    final uri = Uri.http('10.0.0.246:3002', '/updateTask');
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = await http.post(uri, headers: headers, body: json.encode(tasklist[task_no]));
+    print(response);
+
   }
 }
 
+
+
+class Task {
+  String sId;
+  String title;
+  String description;
+  List<SubTasks> subTasks;
+  String role;
+  String shift;
+  String status;
+  String assigned;
+
+  Task(
+      {this.sId,
+        this.title,
+        this.description,
+        this.subTasks,
+        this.role,
+        this.shift,
+        this.status,
+        this.assigned});
+
+  Task.fromJson(Map<String, dynamic> json) {
+    sId = json['_id'];
+    title = json['title'];
+    description = json['description'];
+    if (json['subTasks'] != null) {
+      subTasks = new List<SubTasks>();
+      json['subTasks'].forEach((v) {
+        subTasks.add(new SubTasks.fromJson(v));
+      });
+    }
+    role = json['role'];
+    shift = json['shift'];
+    status = json['status'];
+    assigned = json['assigned'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['_id'] = this.sId;
+    data['title'] = this.title;
+    data['description'] = this.description;
+    if (this.subTasks != null) {
+      data['subTasks'] = this.subTasks.map((v) => v.toJson()).toList();
+    }
+    data['role'] = this.role;
+    data['shift'] = this.shift;
+    data['status'] = this.status;
+    data['assigned'] = this.assigned;
+    return data;
+  }
+}
+
+class SubTasks {
+  String stDesc;
+  bool completed;
+
+  SubTasks({this.stDesc, this.completed});
+
+  SubTasks.fromJson(Map<String, dynamic> json) {
+    stDesc = json['st_desc'];
+    completed = json['completed'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['st_desc'] = this.stDesc;
+    data['completed'] = this.completed;
+    return data;
+  }
+}
