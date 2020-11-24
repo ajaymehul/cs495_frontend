@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'globals.dart' as global;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -22,7 +22,7 @@ class _SignInState extends State<SignIn> {
       'password': passwordController.text,
     };
     final jsonString = json.encode(body);
-    final uri = Uri.http('10.0.0.246:3002', '/login');
+    final uri = Uri.http(global.ip, '/login');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.post(uri, headers: headers, body: jsonString);
 

@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'scheduleViewer.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'globals.dart' as global;
 
 class TaskManager extends StatefulWidget {
   @override
@@ -22,7 +23,7 @@ class _TaskManagerState extends State<TaskManager> {
 
   Future fetchTasks() async{
 
-    final uri = Uri.http('10.0.0.246:3002', '/tasks');
+    final uri = Uri.http(global.ip, '/tasks');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.get(uri, headers: headers);
 

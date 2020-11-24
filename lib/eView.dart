@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'scheduleViewer.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'globals.dart' as global;
 
 class EmployeeView extends StatefulWidget {
   @override
@@ -21,7 +22,7 @@ class _eViewState extends State<EmployeeView> {
 
   Future fetchTasks() async{
 
-    final uri = Uri.http('10.0.0.246:3002', '/tasks/' + user_id);
+    final uri = Uri.http(global.ip, '/tasks/' + user_id);
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.get(uri, headers: headers);
 
