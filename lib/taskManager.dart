@@ -34,10 +34,22 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
     setState(() {
       tasklist=(json.decode(response.body) as List).map((i) =>
           Task.fromJson(i)).toList();
-      for(int i=0; i<tasklist.length;i++) _isExpanded.add(true);
+      for(int i=0; i<tasklist.length;i++) _isExpanded.add(false);
     });
     print(json.encode(tasklist[0]));
 
+  }
+  Future deleteTask(String taskid) async{
+
+    final uri = Uri.http(global.ip, '/deleteTask/'+taskid);
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = await http.post(uri, headers: headers);
+
+
+    setState(() {
+      fetchTasks();
+    });
+    print(response);
   }
 
   @override
@@ -150,46 +162,49 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
       itemBuilder: (context, taskindex) {
         final Task item = tasklist[taskindex];
         return Dismissible(
-            key: Key('item ${tasklist[taskindex].sId}'),
-          direction: DismissDirection.startToEnd,
-        background: Container(
-        color: Colors.red,
-        child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-        Icon(Icons.delete, color: Colors.white),
-        Text(' Delete Task', style: TextStyle(color: Colors.white)),
-        ],
-        ),
-        ),
-        ),
-        confirmDismiss: (DismissDirection direction) async {
-        return await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-        return AlertDialog(
-        title: const Text("Delete Confirmation"),
-        content: const Text("Are you sure you want to delete this item?"),
-        actions: <Widget>[
-        FlatButton(
-        onPressed: () => Navigator.of(context).pop(true),
-        child: const Text("Delete")
-        ),
-        FlatButton(
-        onPressed: () => Navigator.of(context).pop(false),
-        child: const Text("Cancel"),
-        ),], );},);},
-        onDismissed: (DismissDirection direction) {
-        if (direction == DismissDirection.startToEnd) {
-        print("Add to favorite");
-        }
-
-        setState(() {
-        });
-        },
-        child:
+            key: UniqueKey(),
+            direction: DismissDirection.startToEnd,
+            background: Container(
+              color: Colors.transparent,
+              child: Padding(
+                padding: const EdgeInsets.all(15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    SizedBox(width: 20),
+                    Icon(Icons.delete, color: Colors.red, size: 65)
+                    ],
+                  ),
+                ),
+              ),
+              confirmDismiss: (DismissDirection direction) async {
+                return await showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("Delete Confirmation"),
+                    content: const Text("Are you sure you want to delete this item?"),
+                    actions: <Widget>[
+                      FlatButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text("Delete")
+                      ),
+                      FlatButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text("Cancel"),
+                        ),
+                    ],
+                  );
+                  },
+                );
+                },
+                onDismissed: (DismissDirection direction) {
+                  if (direction == DismissDirection.startToEnd) {
+                    deleteTask(tasklist[taskindex].sId);
+                    print("Deleted");
+                    }
+                  },
+                child:
 
           Center(
           child: Container(

@@ -23,26 +23,37 @@ class _AddTaskState extends State<AddTask> {
   final roleController = TextEditingController();
   final shiftController = TextEditingController();
   List<User> userlist;
-  List<String> usernamelist = new List<String>();
+  List<String> usernamelist;
   String dropdownValue = "";
   bool flag = true;
   List<TextEditingController> subTasks = new List<TextEditingController>();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    usernamelist = new List<String>();
+    super.initState();
+  }
+
 
   Future fetchUsers() async{
     final uri = Uri.http(global.ip, '/users');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.get(uri, headers: headers);
+      usernamelist.clear();
 
-    setState(() {
+      usernamelist.add("open");
       userlist=(json.decode(response.body) as List).map((i) =>
           User.fromJson(i)).toList();
-    });
-    print(json.encode(userlist[0]));
+      for(int i=0; i< userlist.length; i++){
+        usernamelist.add(userlist[i].username);
+      }
+      print(usernamelist);
+      dropdownValue = usernamelist[0];
 
-    for(int i=0; i< userlist.length; i++){
-      usernamelist.add(userlist[i].username);
-    }
-    dropdownValue = usernamelist[0];
+    setState(() {
+    });
+
 
   }
 
@@ -74,7 +85,6 @@ class _AddTaskState extends State<AddTask> {
     print(json.encode(st_list));
     print(jsonString);
     final response = http.post(uri, headers: headers, body: jsonString);
-    print(response);
 
     Navigator.of(context).pop();
   }
@@ -84,11 +94,11 @@ class _AddTaskState extends State<AddTask> {
   Widget build(BuildContext context) {
     user_id = ModalRoute.of(context).settings.arguments;
     if(flag){
-      usernamelist.add("open");
       fetchUsers();
-      flag = false;
+
       subTasks.add(new TextEditingController());
       print(subTasks.length.toString());
+      flag = false;
     }
 
     return Scaffold(
@@ -186,7 +196,7 @@ class _AddTaskState extends State<AddTask> {
                           child: Text(value),
                         );
                       })
-                          .toList(),
+                          .toList() ?? null,
                     ),
                     SizedBox(
                     )
