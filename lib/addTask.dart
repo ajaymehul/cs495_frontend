@@ -76,7 +76,7 @@ class _AddTaskState extends State<AddTask> {
       'title': titleController.text,
       'description': descController.text,
       'role': roleController.text,
-      'subTasks': json.encode(st_list),
+      'subTasks': st_list,
       'shift': shiftController.text,
       'status': 'incomplete',
       'assigned': dropdownValue
@@ -316,9 +316,10 @@ class _AddTaskState extends State<AddTask> {
                     .showSnackBar(SnackBar(content: Text('Subtasks cannot be empty')));
               }
               else{
+                postTask(context);
                 Scaffold.of(context)
                     .showSnackBar(SnackBar(content: Text('Processing Data')));
-                postTask(context);
+
               }
             }
           },
