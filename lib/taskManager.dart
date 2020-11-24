@@ -16,11 +16,13 @@ class TaskManager extends StatefulWidget {
   _TaskManagerState createState() => _TaskManagerState();
 }
 
-class _TaskManagerState extends State<TaskManager> {
+class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin {
   String user_id = "";
   List<Task> tasklist = new List<Task>();
   bool flag = true;
-
+  List<bool> _isExpanded = new List<bool>();
+  AnimationController _controller;
+  Animation<double> _animation;
 
   Future fetchTasks() async{
 
@@ -28,9 +30,11 @@ class _TaskManagerState extends State<TaskManager> {
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.get(uri, headers: headers);
 
+
     setState(() {
       tasklist=(json.decode(response.body) as List).map((i) =>
           Task.fromJson(i)).toList();
+      for(int i=0; i<tasklist.length;i++) _isExpanded.add(true);
     });
     print(json.encode(tasklist[0]));
 
@@ -39,6 +43,16 @@ class _TaskManagerState extends State<TaskManager> {
   @override
   void initState() {
     // TODO: implement initState
+    _controller = AnimationController(
+        duration: const Duration(milliseconds: 1000),
+        vsync: this,
+        value: 0,
+        lowerBound: 0,
+        upperBound: 1
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
+
+    _controller.forward();
     super.initState();
   }
 
@@ -82,7 +96,7 @@ class _TaskManagerState extends State<TaskManager> {
         )],
       ),
       body: RefreshIndicator(
-          child: _myListView(),
+          child: _myListView(this),
           onRefresh: () => _handleRefresh(),
       ),
       //navigation bar to switch to scheduling
@@ -129,13 +143,55 @@ class _TaskManagerState extends State<TaskManager> {
 
 
 
-  Widget _myListView() {
+  Widget _myListView(TickerProvider tp) {
     return ListView.builder(
       padding: EdgeInsets.all(15),
       itemCount: tasklist.length,
       itemBuilder: (context, taskindex) {
         final Task item = tasklist[taskindex];
-        return Center(
+        return Dismissible(
+            key: Key('item ${tasklist[taskindex].sId}'),
+          direction: DismissDirection.startToEnd,
+        background: Container(
+        color: Colors.red,
+        child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+        Icon(Icons.delete, color: Colors.white),
+        Text(' Delete Task', style: TextStyle(color: Colors.white)),
+        ],
+        ),
+        ),
+        ),
+        confirmDismiss: (DismissDirection direction) async {
+        return await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+        return AlertDialog(
+        title: const Text("Delete Confirmation"),
+        content: const Text("Are you sure you want to delete this item?"),
+        actions: <Widget>[
+        FlatButton(
+        onPressed: () => Navigator.of(context).pop(true),
+        child: const Text("Delete")
+        ),
+        FlatButton(
+        onPressed: () => Navigator.of(context).pop(false),
+        child: const Text("Cancel"),
+        ),], );},);},
+        onDismissed: (DismissDirection direction) {
+        if (direction == DismissDirection.startToEnd) {
+        print("Add to favorite");
+        }
+
+        setState(() {
+        });
+        },
+        child:
+
+          Center(
           child: Container(
             margin: const EdgeInsets.only(top: 10.0),
             decoration: BoxDecoration(
@@ -165,9 +221,31 @@ class _TaskManagerState extends State<TaskManager> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 ListTile(
+                  leading: SizedBox(),
                   title: Center(child: Text(tasklist[taskindex].title,
                       style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white)))),
+                  trailing: IconButton(
+                    icon: _isExpanded[taskindex]?Icon(Icons.arrow_upward_rounded):Icon(Icons.arrow_downward_rounded),
+                    color: Colors.white,
+                    onPressed: () {
+                      setState(() {
+                        _isExpanded[taskindex]= !_isExpanded[taskindex];
+
+                      });
+                    },
+                  )
                 ),
+                AnimatedSize(
+                    vsync: tp,
+                    duration: Duration(milliseconds: 1000),
+                    curve: Curves.easeInOut,
+
+                  child: Container(
+                    child: Container(
+                        child: !_isExpanded[taskindex]
+                            ? null
+                            : FadeTransition(opacity: _animation,
+                            child: Column(children: [
                 Container(
                     padding: EdgeInsets.all(8.0),
                     child: Center( child: Text(tasklist[taskindex].description,
@@ -179,7 +257,7 @@ class _TaskManagerState extends State<TaskManager> {
                   title: Text("Assigned:",style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white))),
                   trailing: Text(tasklist[taskindex].assigned,style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white))),
                 ),
-                _mySubTasks(taskindex),
+                _mySubTasks(taskindex)]))))),
                 Padding(
                   padding: EdgeInsets.all(15.0),
                   child: new LinearPercentIndicator(
@@ -196,7 +274,7 @@ class _TaskManagerState extends State<TaskManager> {
               ],
             ),
           ),
-        );
+        ));
       },
     );
   }

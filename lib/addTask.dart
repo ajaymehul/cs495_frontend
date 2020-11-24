@@ -46,9 +46,10 @@ class _AddTaskState extends State<AddTask> {
 
   }
 
-  Future postTask() async{
+  Future postTask(BuildContext context) async{
 
-    if(subTasks[0].text == ""){ return;}
+    if(subTasks[0].text == ""){
+      return;}
     List<SubTasks> st_list = new List<SubTasks>();
     for(int i=0;i<subTasks.length;i++){
       SubTasks temp = new SubTasks();
@@ -66,12 +67,16 @@ class _AddTaskState extends State<AddTask> {
       'status': 'incomplete',
       'assigned': dropdownValue
     };
+
     final jsonString = json.encode(body);
     final uri = Uri.http(global.ip, '/addTask');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
-    final response = await http.post(uri, headers: headers, body: jsonString);
     print(json.encode(st_list));
     print(jsonString);
+    final response = http.post(uri, headers: headers, body: jsonString);
+    print(response);
+
+    Navigator.of(context).pop();
   }
 
 
@@ -253,9 +258,19 @@ class _AddTaskState extends State<AddTask> {
                   // otherwise.
                   if (_formKey.currentState.validate()) {
                     // If the form is valid, display a Snackbar.
+                    bool invalidst = false;
+                    for(int i=0;i<subTasks.length;i++){
+                      if(subTasks[i].text == "") invalidst = true;
+                    }
+                    if(invalidst){
+                      Scaffold.of(context)
+                          .showSnackBar(SnackBar(content: Text('Subtasks cannot be empty')));
+                    }
+                    else{
                     Scaffold.of(context)
                         .showSnackBar(SnackBar(content: Text('Processing Data')));
-                    postTask();
+                    postTask(context);
+                    }
                   }
                 },
                 child: Text('Submit'),
