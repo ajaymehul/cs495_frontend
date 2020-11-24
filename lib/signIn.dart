@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
+import 'package:google_fonts/google_fonts.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -45,7 +46,9 @@ class _SignInState extends State<SignIn> {
       );
     }
   }
-
+  final Shader linearGradient = LinearGradient(
+    colors: <Color>[Color(0xffDA44bb), Color(0xff8921aa)],
+  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,17 +61,18 @@ class _SignInState extends State<SignIn> {
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(10),
                     child: Text(
-                      '[Name Placeholder ]',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 30),
+                      'BizManager',
+                      style: GoogleFonts.josefinSans( textStyle: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 50, foreground: Paint()..shader = linearGradient)),
                     )),
+                SizedBox(height: 20),
                 Container(
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(10),
                     child: Text(
                       'Sign in',
-                      style: TextStyle(fontSize: 20),
+                      style: GoogleFonts.josefinSans( textStyle:TextStyle(fontSize: 20)),
                     )),
                 Container(
                   padding: EdgeInsets.all(10),
@@ -91,13 +95,32 @@ class _SignInState extends State<SignIn> {
                     ),
                   ),
                 ),
-
+                SizedBox(height: 20),
                 Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10)
+                      ),
+                      gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xfffaac7b), Color(0xfff74c83)]),
+
+                    ),
                     height: 50,
                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: RaisedButton(
+                    child: FlatButton(
+                      color: Colors.transparent,
                       textColor: Colors.white,
-                      child: Text('Login'),
+                      child: Text(
+                        'Login',
+                        style: GoogleFonts.josefinSans( textStyle: TextStyle(
+                            fontWeight: FontWeight.w700, fontSize: 15)),
+                      ),
                       onPressed: getToken,
                     )),
                 SizedBox(height: 30)

@@ -16,10 +16,14 @@ class EmployeeView extends StatefulWidget {
   _eViewState createState() => _eViewState();
 }
 
-class _eViewState extends State<EmployeeView> {
+class _eViewState extends State<EmployeeView> with TickerProviderStateMixin {
   String user_id = "";
   List<Task> tasklist;
   bool flag = true;
+
+  List<bool> _isExpanded = new List<bool>();
+  AnimationController _controller;
+  Animation<double> _animation;
 
 
   Future fetchTasks() async{
@@ -31,6 +35,7 @@ class _eViewState extends State<EmployeeView> {
     setState(() {
       tasklist=(json.decode(response.body) as List).map((i) =>
           Task.fromJson(i)).toList();
+      for(int i=0; i<tasklist.length;i++) _isExpanded.add(false);
     });
     print(json.encode(tasklist[0]));
 
@@ -39,6 +44,16 @@ class _eViewState extends State<EmployeeView> {
   @override
   void initState() {
     // TODO: implement initState
+    _controller = AnimationController(
+        duration: const Duration(milliseconds: 2000),
+        vsync: this,
+        value: 1,
+        lowerBound: 0,
+        upperBound: 1
+    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+
+    _controller.forward();
     super.initState();
   }
 
@@ -49,6 +64,12 @@ class _eViewState extends State<EmployeeView> {
 
     });
   }
+
+
+  final Shader linearGradient = LinearGradient(
+    colors: <Color>[Color(0xffDA44bb), Color(0xff8921aa)],
+  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+
   @override
   Widget build(BuildContext context) {
     user_id = ModalRoute.of(context).settings.arguments;
@@ -57,10 +78,13 @@ class _eViewState extends State<EmployeeView> {
       fetchTasks();
     }
 
+
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text("Task Manager", style: GoogleFonts.josefinSans()),
+        title: Text("Employee View", style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient, fontSize: 25, fontWeight: FontWeight.bold))),
         actions: <Widget>[FlatButton(
           textColor: Colors.white,
           disabledColor: Colors.grey,
@@ -82,32 +106,43 @@ class _eViewState extends State<EmployeeView> {
       ),
       body: RefreshIndicator(
           onRefresh: () => _handleRefresh(),
-          child: _myListView()
+          child: _myListView(this)
       ),
       //navigation bar to switch to scheduling
       bottomNavigationBar: new Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: Offset(0, 3), // changes position of shadow
+              ),
+            ],
+          ),
           height: 60.0,
           child: Row(
             children: <Widget>[
               Expanded(
                 //Task button - bold font and darker
-                child: MaterialButton(
+                child: FlatButton(
                   textColor: Colors.white,
                   height: 60,
-                  color: Color(0xfee50a80),
+
+                  color: Colors.white,
                   onPressed: () {
                     //nothing
                   },
                   child: Text('Tasks',
-                      style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 18 )),
+                      style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient, fontSize: 24, fontWeight: FontWeight.bold )),
                       textAlign: TextAlign.center),
                 ),
               ),
               Expanded(
                 //Scheduling button - normal font and lighter
-                child: MaterialButton(
+                child: FlatButton(
                   textColor: Colors.white,
-                  color: Color(0xfff3a2755),
+                  color: Colors.white,
                   height: 60,
                   onPressed: () { //navigate to scheduling widget
                     Navigator.of(context)
@@ -117,7 +152,7 @@ class _eViewState extends State<EmployeeView> {
 
                     );
                   },
-                  child: Text('Schedules', style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 18)),textAlign: TextAlign.center),
+                  child: Text('Schedules', style: GoogleFonts.josefinSans(foreground: Paint()..shader = linearGradient, fontSize: 18, fontWeight: FontWeight.w500),textAlign: TextAlign.center),
                 ),
               ),
             ],
@@ -128,7 +163,7 @@ class _eViewState extends State<EmployeeView> {
 
 
 
-  Widget _myListView() {
+  Widget _myListView(TickerProvider tp) {
     return ListView.builder(
       padding: EdgeInsets.all(15),
       itemCount: tasklist.length,
@@ -164,9 +199,31 @@ class _eViewState extends State<EmployeeView> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 ListTile(
+                    leading: SizedBox(),
                   title: Center(child: Text(tasklist[taskindex].title,
                       style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white)))),
+                    trailing: IconButton(
+                      icon: _isExpanded[taskindex]?Icon(Icons.arrow_upward_rounded):Icon(Icons.arrow_downward_rounded),
+                      color: Colors.white,
+                      onPressed: () {
+                        setState(() {
+                          _isExpanded[taskindex]= !_isExpanded[taskindex];
+
+                        });
+                      },
+                    )
                 ),
+              AnimatedSize(
+                vsync: tp,
+                duration: Duration(milliseconds: 1000),
+                curve: Curves.easeInOut,
+
+                child: Container(
+                child: Container(
+                child: !_isExpanded[taskindex]
+                ? null
+                  : FadeTransition(opacity: _animation,
+                    child: Column(children: [
                 Container(
                     padding: EdgeInsets.all(8.0),
                     child: Center( child: Text(tasklist[taskindex].description,
@@ -178,7 +235,7 @@ class _eViewState extends State<EmployeeView> {
                   title: Text("Assigned:",style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white))),
                   trailing: Text(tasklist[taskindex].assigned,style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white))),
                 ),
-                _mySubTasks(taskindex),
+                _mySubTasks(taskindex)]))))),
                 Padding(
                   padding: EdgeInsets.all(15.0),
                   child: new LinearPercentIndicator(
@@ -244,7 +301,7 @@ class _eViewState extends State<EmployeeView> {
   }
 
   Future editTask(int task_no) async{
-    final uri = Uri.http('10.0.0.246:3002', '/updateTask');
+    final uri = Uri.http(global.ip, '/updateTask');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.post(uri, headers: headers, body: json.encode(tasklist[task_no]));
     print(response);

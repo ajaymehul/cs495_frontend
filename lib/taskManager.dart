@@ -55,13 +55,13 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
   void initState() {
     // TODO: implement initState
     _controller = AnimationController(
-        duration: const Duration(milliseconds: 1000),
+        duration: const Duration(milliseconds: 2000),
         vsync: this,
-        value: 0,
+        value: 1,
         lowerBound: 0,
         upperBound: 1
     );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
     _controller.forward();
     super.initState();
@@ -85,10 +85,10 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text("Task Manager", style: GoogleFonts.josefinSans()),
+        title: Text("Manager View", style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient, fontSize: 25, fontWeight: FontWeight.bold))),
         actions: <Widget>[FlatButton(
-          textColor: Colors.white,
           disabledColor: Colors.grey,
           disabledTextColor: Colors.black,
           padding: EdgeInsets.all(2.0),
@@ -102,7 +102,7 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
           },
           child: Text(
             "Add Task",
-            style: GoogleFonts.josefinSans( textStyle: TextStyle(fontSize: 16.0)),
+            style: GoogleFonts.josefinSans( textStyle: TextStyle(foreground: Paint()..shader = linearGradient, fontSize: 18, fontWeight: FontWeight.bold)),
           ),
         )],
       ),
@@ -112,28 +112,39 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
       ),
       //navigation bar to switch to scheduling
       bottomNavigationBar: new Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3), // changes position of shadow
+            ),
+          ],
+        ),
           height: 60.0,
           child: Row(
             children: <Widget>[
               Expanded(
                 //Task button - bold font and darker
-                child: MaterialButton(
+                child: FlatButton(
                     textColor: Colors.white,
                     height: 60,
-                    color: Color(0xfee50a80),
+
+                    color: Colors.white,
                     onPressed: () {
                       //nothing
                     },
                     child: Text('Tasks',
-                      style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 18 )),
+                      style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient, fontSize: 24, fontWeight: FontWeight.bold )),
                       textAlign: TextAlign.center),
                 ),
               ),
               Expanded(
                 //Scheduling button - normal font and lighter
-                child: MaterialButton(
+                child: FlatButton(
                   textColor: Colors.white,
-                  color: Color(0xfff3a2755),
+                  color: Colors.white,
                   height: 60,
                   onPressed: () { //navigate to scheduling widget
                     Navigator.of(context)
@@ -143,7 +154,7 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
 
                     );
                   },
-                  child: Text('Schedules', style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 18)),textAlign: TextAlign.center),
+                  child: Text('Schedules', style: GoogleFonts.josefinSans(foreground: Paint()..shader = linearGradient, fontSize: 18, fontWeight: FontWeight.w500),textAlign: TextAlign.center),
                 ),
               ),
             ],
@@ -152,6 +163,9 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
     );
   }
 
+  final Shader linearGradient = LinearGradient(
+    colors: <Color>[Color(0xffDA44bb), Color(0xff8921aa)],
+  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 
 
   Widget _myListView(TickerProvider tp) {

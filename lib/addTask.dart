@@ -35,6 +35,9 @@ class _AddTaskState extends State<AddTask> {
     super.initState();
   }
 
+  final Shader linearGradient = LinearGradient(
+    colors: <Color>[Color(0xffDA44bb), Color(0xff8921aa)],
+  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 
   Future fetchUsers() async{
     final uri = Uri.http(global.ip, '/users');
@@ -103,8 +106,12 @@ class _AddTaskState extends State<AddTask> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: BackButton(
+            color: Colors.purple
+        ),
+        backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text("Add Task"),
+        title: Text("Add New Task", style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient, fontSize: 25, fontWeight: FontWeight.bold))),
 
       ),
       body: Builder( builder: (context) => Form(
@@ -113,7 +120,11 @@ class _AddTaskState extends State<AddTask> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             TextFormField(
+
+                textAlignVertical: TextAlignVertical.center,
               decoration: InputDecoration(
+                  labelStyle: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient,  fontWeight: FontWeight.bold)),
+                  contentPadding: EdgeInsets.only(left: 10),
                   labelText: 'Title'
               ),
               validator: (value) {
@@ -127,6 +138,8 @@ class _AddTaskState extends State<AddTask> {
             ),
             TextFormField(
               decoration: InputDecoration(
+                  labelStyle: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient,  fontWeight: FontWeight.bold)),
+                  contentPadding: EdgeInsets.only(left: 10),
                   labelText: 'Description'
               ),
               validator: (value) {
@@ -140,6 +153,8 @@ class _AddTaskState extends State<AddTask> {
             ),
             TextFormField(
               decoration: InputDecoration(
+                  labelStyle: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient,  fontWeight: FontWeight.bold)),
+                  contentPadding: EdgeInsets.only(left: 10),
                   labelText: 'Role'
               ),
               validator: (value) {
@@ -153,6 +168,8 @@ class _AddTaskState extends State<AddTask> {
             ),
             TextFormField(
               decoration: InputDecoration(
+                  labelStyle: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient,  fontWeight: FontWeight.bold)),
+                  contentPadding: EdgeInsets.only(left: 10),
                   labelText: 'Shift'
 
               ),
@@ -172,7 +189,7 @@ class _AddTaskState extends State<AddTask> {
                     SizedBox(
                     ),
                     Text('Assign To:',
-                        style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 20 )),
+                        style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient,  fontWeight: FontWeight.bold)),
                         textAlign: TextAlign.center),
                     DropdownButton<String>(
                       value: dropdownValue,
@@ -214,7 +231,6 @@ class _AddTaskState extends State<AddTask> {
               return Container(
                 margin: const EdgeInsets.only(top: 8.0),
                 decoration: BoxDecoration(
-                    color: Color(0xddffffff),
                     borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
@@ -259,36 +275,56 @@ class _AddTaskState extends State<AddTask> {
           },
             )),
 
-            Center(
-
-              child: RaisedButton(
-
-                onPressed: () {
-                  // Validate returns true if the form is valid, or false
-                  // otherwise.
-                  if (_formKey.currentState.validate()) {
-                    // If the form is valid, display a Snackbar.
-                    bool invalidst = false;
-                    for(int i=0;i<subTasks.length;i++){
-                      if(subTasks[i].text == "") invalidst = true;
-                    }
-                    if(invalidst){
-                      Scaffold.of(context)
-                          .showSnackBar(SnackBar(content: Text('Subtasks cannot be empty')));
-                    }
-                    else{
-                    Scaffold.of(context)
-                        .showSnackBar(SnackBar(content: Text('Processing Data')));
-                    postTask(context);
-                    }
-                  }
-                },
-                child: Text('Submit'),
-              ),
-            ),
           ],
         ),
       )),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+              bottomLeft: Radius.circular(0),
+              bottomRight: Radius.circular(0)
+          ),
+          gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xfffaac7b), Color(0xfff74c83)]),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: Offset(0, 3), // changes position of shadow
+              ),
+            ]
+
+        ),
+        child: FlatButton(
+          color: Colors.transparent,
+          onPressed: () {
+            // Validate returns true if the form is valid, or false
+            // otherwise.
+            if (_formKey.currentState.validate()) {
+              // If the form is valid, display a Snackbar.
+              bool invalidst = false;
+              for(int i=0;i<subTasks.length;i++){
+                if(subTasks[i].text == "") invalidst = true;
+              }
+              if(invalidst){
+                Scaffold.of(context)
+                    .showSnackBar(SnackBar(content: Text('Subtasks cannot be empty')));
+              }
+              else{
+                Scaffold.of(context)
+                    .showSnackBar(SnackBar(content: Text('Processing Data')));
+                postTask(context);
+              }
+            }
+          },
+          child: Text('Submit', style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 20, color: Colors.white,fontWeight: FontWeight.bold))),
+        ),
+      ) ,
     );
   }
 
