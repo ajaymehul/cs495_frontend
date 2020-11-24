@@ -119,7 +119,7 @@ class _SignInState extends State<SignIn> {
                       child: Text(
                         'Login',
                         style: GoogleFonts.josefinSans( textStyle: TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 15)),
+                            fontWeight: FontWeight.w700, fontSize: 22)),
                       ),
                       onPressed: getToken,
                     )),

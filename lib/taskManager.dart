@@ -112,7 +112,9 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
       ),
       //navigation bar to switch to scheduling
       bottomNavigationBar: new Container(
+
         decoration: BoxDecoration(
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.5),
@@ -125,6 +127,19 @@ class _TaskManagerState extends State<TaskManager> with TickerProviderStateMixin
           height: 60.0,
           child: Row(
             children: <Widget>[
+              Expanded(
+
+                  child: IconButton(
+
+                    icon: Icon(Icons.logout),
+
+                    color: Colors.purple,
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed("signIn");
+                    },
+
+                  )
+              ),
               Expanded(
                 //Task button - bold font and darker
                 child: FlatButton(
