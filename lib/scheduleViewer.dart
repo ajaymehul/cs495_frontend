@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'taskManager.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -17,6 +18,8 @@ class Scheduler extends StatefulWidget {
 
 class SchedulerState extends State<Scheduler> {
   String user_id = "";
+  CalendarController _calendarController;
+
   // List<Task> tasklist;
 
   // Future fetchTasks() async{
@@ -32,38 +35,81 @@ class SchedulerState extends State<Scheduler> {
   //   print(json.encode(tasklist[0]));
   //
   // }
+  @override
+  initState() {
+    _calendarController = CalendarController();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     user_id = ModalRoute.of(context).settings.arguments;
 
+
     return Scaffold(
           appBar: AppBar(
-            title: Text('My Schedule'),
-            actions: <Widget>[
+            centerTitle: true,
+            title: Text('Scheduler', style: GoogleFonts.josefinSans()),
+              actions: <Widget>[FlatButton(
+                textColor: Colors.white,
+                disabledColor: Colors.grey,
+                disabledTextColor: Colors.black,
+                padding: EdgeInsets.all(2.0),
+                onPressed: () {
+                  // Navigator.of(context)
+                  //     .pushNamed(
+                  //   "addTask",
+                  //   // we are passing a value to the settings page
+                  //   //arguments: '${user['username']}',
+                  // );
+                },
+                child: Text(
+                  "Add Shift",
+                  style: GoogleFonts.josefinSans( textStyle: TextStyle(fontSize: 16.0)),
+                ),
+              ),
+              //button to navigate calendar dates
               IconButton(icon: Icon(Icons.arrow_forward),
                 onPressed: () {
-                  //change state
-                },
-              ),
-            ],
-            backgroundColor: Colors.lightGreenAccent,
+                _calendarController.forward();
+              },
+            )],
           ),
           body: SfCalendar(
             headerHeight: 60,
             viewHeaderHeight: 50,
-            view: CalendarView.week,
+            view: CalendarView.month,
+            showDatePickerButton: true,
+            allowedViews: <CalendarView>
+            [
+              CalendarView.day,
+              CalendarView.week,
+              CalendarView.month,
+              CalendarView.schedule
+            ],
+            controller: _calendarController,
             dataSource: _getDataSource(),
           ),
           bottomNavigationBar: new Container(
+              //height: 60.0,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: Offset(0,3),
+                ),
+              ],
+            ),
               height: 60.0,
-              color: Colors.teal[600],
               child: Row(
                 children: <Widget>[
                   Expanded(
                     //Task button - bold font and darker
                     child: MaterialButton(
-                      color: Colors.teal[600],
+                      color: Color(0xfff3a2755),
                       textColor: Colors.white,
                       height: 60,
                       onPressed: () {
@@ -81,7 +127,7 @@ class SchedulerState extends State<Scheduler> {
                   Expanded(
                     //Scheduling button - normal font and lighter
                     child: MaterialButton(
-                      color: Colors.teal[800],
+                      color: Color(0xfff74c83),
                       textColor: Colors.white,
                       height: 60,
                       onPressed: () { //navigate to scheduling widget
@@ -134,3 +180,5 @@ class _DataSource extends CalendarDataSource {
     appointments = source;
   }
 }
+
+//
