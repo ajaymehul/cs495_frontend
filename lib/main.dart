@@ -5,7 +5,7 @@ import 'taskManager.dart';
 import 'addTask.dart';
 import 'eView.dart';
 import 'scheduleViewer.dart';
-
+import 'addSchedule.dart';
 
 void main () {
 
@@ -23,7 +23,8 @@ void main () {
           "addTask": (BuildContext taskManagerContext) => AddTask(),
           "mschedule": (BuildContext taskManagerContext) => SampleBrowser(),
           "eView": (BuildContext eViewContext) => EmployeeView(),
-          "scheduler" : (BuildContext schedulerContext) => Scheduler()
+          "scheduler" : (BuildContext schedulerContext) => Scheduler(),
+          "addSchedule": (BuildContext schedulerContext) => AddSchedule()
       },
         initialRoute: "home",
       )
