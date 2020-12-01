@@ -151,59 +151,6 @@ class _AddScheduleState extends State<AddSchedule> {
                 )
             ),
 
-            Expanded(
-                child: ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: false,
-              itemCount: subTasks.length,
-              itemBuilder: (context, index) {
-                print(index.toString()+ "/" + subTasks.length.toString());
-              return Container(
-                margin: const EdgeInsets.only(top: 8.0),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20)
-                )),
-              child:  Container(
-              child: Row(
-                children: [Expanded(child: TextFormField(
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-
-                      labelText: 'Enter Sub Task'
-
-                  ),
-                  controller: subTasks[index],
-                  style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 15 )),
-                )),
-                  IconButton(
-                    icon: Icon(Icons.add_circle_rounded, color: Colors.green),
-                    tooltip: 'Add new task',
-                    onPressed: () {
-                      subTasks.add(new TextEditingController());
-                      setState(() {
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.cancel,color: Colors.red),
-                    tooltip: 'Delete task',
-                    onPressed: () {
-                      if(index>0) subTasks.removeAt(index);
-                      setState(() {
-                      });
-                    },
-                  )
-                ]
-
-              ),
-              )
-            );
-          },
-            )),
 
           ],
         ),

@@ -56,12 +56,12 @@ class SchedulerState extends State<Scheduler> {
                 disabledTextColor: Colors.black,
                 padding: EdgeInsets.all(2.0),
                 onPressed: () {
-                  // Navigator.of(context)
-                  //     .pushNamed(
-                  //   "addTask",
-                  //   // we are passing a value to the settings page
-                  //   //arguments: '${user['username']}',
-                  // );
+                   Navigator.of(context)
+                       .pushNamed(
+                     "addSchedule",
+                     // we are passing a value to the settings page
+                    //arguments: '${user['username']}',
+                   );
                 },
                 child: Text(
                   "Add Shift",
