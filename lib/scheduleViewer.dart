@@ -58,41 +58,35 @@ class SchedulerState extends State<Scheduler> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        title: Text('Scheduler', style: GoogleFonts.josefinSans(
-            textStyle: TextStyle(foreground: Paint()
-              ..shader = linearGradient,
-                fontSize: 25, fontWeight: FontWeight.bold))),
-        actions: <Widget>[FlatButton(
-          textColor: Colors.white,
-          disabledColor: Colors.grey,
-          disabledTextColor: Colors.black,
-          padding: EdgeInsets.all(2.0),
-          onPressed: () {
-            // Navigator.of(context)
-            //     .pushNamed(
-            //   "addShift",
-            //   // we are passing a value to the settings page
-            //   //arguments: '${user['username']}',
-            // );
-          },
-          child: Text(
-            "Add Shift",
-            style: GoogleFonts.josefinSans(
-                textStyle: TextStyle(foreground: Paint()
-                  ..shader = linearGradient,
-                    fontSize: 18, fontWeight: FontWeight.bold)),
-          ),
-        ),
-          //button to navigate calendar dates
-          IconButton(icon: Icon(Icons.arrow_forward),
-            onPressed: () {
-              _calendarController.forward();
-            },
-          )
-        ],
+
+          appBar: AppBar(
+            centerTitle: true,
+            title: Text('Scheduler', style: GoogleFonts.josefinSans()),
+              actions: <Widget>[FlatButton(
+                textColor: Colors.white,
+                disabledColor: Colors.grey,
+                disabledTextColor: Colors.black,
+                padding: EdgeInsets.all(2.0),
+                onPressed: () {
+                   Navigator.of(context)
+                       .pushNamed(
+                     "addSchedule",
+                     // we are passing a value to the settings page
+                    //arguments: '${user['username']}',
+                   );
+                },
+                child: Text(
+                  "Add Shift",
+                  style: GoogleFonts.josefinSans( textStyle: TextStyle(fontSize: 16.0)),
+                ),
+              ),
+              //button to navigate calendar dates
+              IconButton(icon: Icon(Icons.arrow_forward),
+                onPressed: () {
+                _calendarController.forward();
+              },
+            )],
+
       ),
       body: SfCalendar(
         headerHeight: 60,
