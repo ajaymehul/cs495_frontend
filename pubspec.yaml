@@ -33,6 +33,7 @@ dependencies:
   syncfusion_flutter_calendar: ^18.3.35
   percent_indicator: "^2.1.7+2"
   google_fonts: any
+  date_format: any
 
 
 dev_dependencies:

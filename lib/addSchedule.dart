@@ -8,7 +8,8 @@ import 'dart:convert';
 import 'globals.dart' as global;
 import 'package:google_fonts/google_fonts.dart';
 import 'SubTasks.dart';
-
+import 'package:date_format/date_format.dart';
+import 'package:intl/intl.dart';
 class AddSchedule extends StatefulWidget {
   @override
   _AddScheduleState createState() => _AddScheduleState();
@@ -16,6 +17,7 @@ class AddSchedule extends StatefulWidget {
 
 class _AddScheduleState extends State<AddSchedule> {
 
+  Shift newShift = new Shift();
   String user_id = "";
   final _formKey = GlobalKey<FormState>();
   List<User> userlist;
@@ -24,10 +26,108 @@ class _AddScheduleState extends State<AddSchedule> {
   bool flag = true;
   List<TextEditingController> subTasks = new List<TextEditingController>();
 
+  double _height;
+  double _width;
+
+  String _setTime, _setDate;
+  String _setTime2, _setDate2;
+
+  String _hour, _minute, _time;
+  String _hour2, _minute2, _time2;
+
+  String dateTime;
+  String dateTime2;
+
+  DateTime selectedDate = DateTime.now();
+  DateTime selectedDate2 = DateTime.now();
+
+  TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
+  TimeOfDay selectedTime2 = TimeOfDay(hour: 00, minute: 00);
+
+  TextEditingController _dateController = TextEditingController();
+  TextEditingController _timeController = TextEditingController();
+
+  TextEditingController _dateController2 = TextEditingController();
+  TextEditingController _timeController2 = TextEditingController();
+
+  Future<Null> _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        initialDatePickerMode: DatePickerMode.day,
+        firstDate: DateTime(2015),
+        lastDate: DateTime(2101));
+    if (picked != null)
+      setState(() {
+        selectedDate = picked;
+        _dateController.text = DateFormat.yMd().format(selectedDate);
+      });
+  }
+
+  Future<Null> _selectDate2(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate2,
+        initialDatePickerMode: DatePickerMode.day,
+        firstDate: DateTime(2015),
+        lastDate: DateTime(2101));
+    if (picked != null)
+      setState(() {
+        selectedDate2 = picked;
+        _dateController2.text = DateFormat.yMd().format(selectedDate2);
+      });
+  }
+
+  Future<Null> _selectTime(BuildContext context) async {
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null)
+      setState(() {
+        selectedTime = picked;
+        _hour = selectedTime.hour.toString();
+        _minute = selectedTime.minute.toString();
+        _time = _hour + ' : ' + _minute;
+        _timeController.text = _time;
+        _timeController.text = formatDate(
+            DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
+            [hh, ':', nn, " ", am]).toString();
+      });
+  }
+
+  Future<Null> _selectTime2(BuildContext context) async {
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime2,
+    );
+    if (picked != null)
+      setState(() {
+        selectedTime2 = picked;
+        _hour2 = selectedTime2.hour.toString();
+        _minute2 = selectedTime2.minute.toString();
+        _time2 = _hour2 + ' : ' + _minute2;
+        _timeController2.text = _time2;
+        _timeController2.text = formatDate(
+            DateTime(2019, 08, 1, selectedTime2.hour, selectedTime2.minute),
+            [hh, ':', nn, " ", am]).toString();
+      });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     usernamelist = new List<String>();
+    _dateController.text = DateFormat.yMd().format(DateTime.now());
+
+    _dateController2.text = DateFormat.yMd().format(DateTime.now());
+    _timeController.text = formatDate(
+        DateTime(2019, 08, 1, DateTime.now().hour, DateTime.now().minute),
+        [hh, ':', nn, " ", am]).toString();
+
+    _timeController2.text = formatDate(
+        DateTime(2019, 08, 1, DateTime.now().hour, DateTime.now().minute),
+        [hh, ':', nn, " ", am]).toString();
     super.initState();
   }
 
@@ -40,8 +140,6 @@ class _AddScheduleState extends State<AddSchedule> {
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
     final response = await http.get(uri, headers: headers);
       usernamelist.clear();
-
-      usernamelist.add("open");
       userlist=(json.decode(response.body) as List).map((i) =>
           User.fromJson(i)).toList();
       for(int i=0; i< userlist.length; i++){
@@ -56,7 +154,7 @@ class _AddScheduleState extends State<AddSchedule> {
 
   }
 
-  Future postTask(BuildContext context) async{
+  Future postSchedule(BuildContext context) async{
 
     if(subTasks[0].text == ""){
       return;}
@@ -88,6 +186,12 @@ class _AddScheduleState extends State<AddSchedule> {
   @override
   Widget build(BuildContext context) {
     user_id = ModalRoute.of(context).settings.arguments;
+    _height = MediaQuery.of(context).size.height;
+    _width = MediaQuery.of(context).size.width;
+    dateTime = DateFormat.yMd().format(DateTime.now());
+
+    dateTime2 = DateFormat.yMd().format(DateTime.now());
+
     if(flag){
       fetchUsers();
 
@@ -111,6 +215,152 @@ class _AddScheduleState extends State<AddSchedule> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            SizedBox(
+              height: 15,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Text("Start", style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient, fontSize: 20, fontWeight: FontWeight.bold))),
+                Column(
+                  children: <Widget>[
+                    InkWell(
+                      onTap: () {
+                        _selectDate(context);
+                      },
+                      child: Container(
+                        width: _width / 3.4,
+                        height: _height / 18,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(color: Colors.grey[200]),
+                        child: TextFormField(
+                          style: TextStyle(fontSize: 20),
+                          textAlign: TextAlign.center,
+                          enabled: false,
+                          keyboardType: TextInputType.text,
+                          controller: _dateController,
+                          onSaved: (String val) {
+                            _setDate = val;
+                          },
+                          decoration: InputDecoration(
+                              disabledBorder:
+                              UnderlineInputBorder(borderSide: BorderSide.none),
+                              // labelText: 'Time',
+                              contentPadding: EdgeInsets.only(top: 0.0)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: <Widget>[
+                    InkWell(
+                      onTap: () {
+                        _selectTime(context);
+                      },
+                      child: Container(
+                        width: _width / 3.4,
+                        height: _height / 18,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(color: Colors.grey[200]),
+                        child: TextFormField(
+                          style: TextStyle(fontSize: 20),
+                          textAlign: TextAlign.center,
+                          onSaved: (String val) {
+                            _setTime = val;
+                          },
+                          enabled: false,
+                          keyboardType: TextInputType.text,
+                          controller: _timeController,
+                          decoration: InputDecoration(
+                              disabledBorder:
+                              UnderlineInputBorder(borderSide: BorderSide.none),
+                              // labelText: 'Time',
+                              contentPadding: EdgeInsets.all(5)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            SizedBox(
+              height: 20
+            ),
+// ---------------------------------------------End Date Time ---------------------------------------------------
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Text("End", style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient, fontSize: 20, fontWeight: FontWeight.bold))),
+                Column(
+                  children: <Widget>[
+                    InkWell(
+                      onTap: () {
+                        _selectDate2(context);
+                      },
+                      child: Container(
+                        width: _width / 3.4,
+                        height: _height / 18,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(color: Colors.grey[200]),
+                        child: TextFormField(
+                          style: TextStyle(fontSize: 20),
+                          textAlign: TextAlign.center,
+                          enabled: false,
+                          keyboardType: TextInputType.text,
+                          controller: _dateController2,
+                          onSaved: (String val) {
+                            _setDate2 = val;
+                          },
+                          decoration: InputDecoration(
+                              disabledBorder:
+                              UnderlineInputBorder(borderSide: BorderSide.none),
+                              // labelText: 'Time',
+                              contentPadding: EdgeInsets.only(top: 0.0)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: <Widget>[
+                    InkWell(
+                      onTap: () {
+                        _selectTime2(context);
+                      },
+                      child: Container(
+                        width: _width / 3.4,
+                        height: _height / 18,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(color: Colors.grey[200]),
+                        child: TextFormField(
+                          style: TextStyle(fontSize: 20),
+                          textAlign: TextAlign.center,
+                          onSaved: (String val) {
+                            _setTime2 = val;
+                          },
+                          enabled: false,
+                          keyboardType: TextInputType.text,
+                          controller: _timeController2,
+                          decoration: InputDecoration(
+                              disabledBorder:
+                              UnderlineInputBorder(borderSide: BorderSide.none),
+                              // labelText: 'Time',
+                              contentPadding: EdgeInsets.all(5)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            SizedBox(
+                height: 20
+            ),
 
             Container(
                 child: Row(
@@ -119,7 +369,7 @@ class _AddScheduleState extends State<AddSchedule> {
                     SizedBox(
                     ),
                     Text('Assign To:',
-                        style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient,  fontWeight: FontWeight.bold)),
+                        style: GoogleFonts.josefinSans(textStyle: TextStyle(foreground: Paint()..shader = linearGradient,  fontWeight: FontWeight.bold, fontSize: 20)),
                         textAlign: TextAlign.center),
                     DropdownButton<String>(
                       value: dropdownValue,
@@ -180,25 +430,8 @@ class _AddScheduleState extends State<AddSchedule> {
         child: FlatButton(
           color: Colors.transparent,
           onPressed: () {
-            // Validate returns true if the form is valid, or false
-            // otherwise.
-            if (_formKey.currentState.validate()) {
-              // If the form is valid, display a Snackbar.
-              bool invalidst = false;
-              for(int i=0;i<subTasks.length;i++){
-                if(subTasks[i].text == "") invalidst = true;
-              }
-              if(invalidst){
-                Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text('Subtasks cannot be empty')));
-              }
-              else{
-                postTask(context);
-                Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text('Processing Data')));
-
-              }
-            }
+            print(_dateController2.text);
+            print(_timeController2.text);
           },
           child: Text('Submit', style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 20, color: Colors.white,fontWeight: FontWeight.bold))),
         ),
