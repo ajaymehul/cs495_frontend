@@ -17,7 +17,6 @@ class AddSchedule extends StatefulWidget {
 
 class _AddScheduleState extends State<AddSchedule> {
 
-  Shift newShift = new Shift();
   String user_id = "";
   final _formKey = GlobalKey<FormState>();
   List<User> userlist;
