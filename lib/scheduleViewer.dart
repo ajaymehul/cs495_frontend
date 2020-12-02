@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'globals.dart' as global;
+import 'Schedule.dart';
 import 'taskManager.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'eView.dart';
 
+
 class Scheduler extends StatefulWidget {
   @override
   SchedulerState createState() => SchedulerState();
@@ -19,22 +22,24 @@ class Scheduler extends StatefulWidget {
 class SchedulerState extends State<Scheduler> {
   String user_id = "";
   CalendarController _calendarController;
+  List<Schedule> schedulelist = new List<Schedule>();
+  bool flag = true;
+  List<bool> _isExpanded = new List<bool>();
 
-  // List<Task> tasklist;
+  Future fetchSchedules() async {
+    final uri = Uri.http(global.ip, '/shifts');
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = await http.get(uri, headers: headers);
 
-  // Future fetchTasks() async{
-  //
-  //   final uri = Uri.http('10.0.0.246:3002', '/tasks/' + user_id);
-  //   final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
-  //   final response = await http.get(uri, headers: headers);
-  //
-  //   setState(() {
-  //     tasklist=(json.decode(response.body) as List).map((i) =>
-  //         Task.fromJson(i)).toList();
-  //   });
-  //   print(json.encode(tasklist[0]));
-  //
-  // }
+    setState(() {
+      schedulelist = (json.decode(response.body) as List).map((i) =>
+          Schedule.fromJson(i)).toList();
+      for (int i = 0; i < schedulelist.length; i++)
+        _isExpanded.add(false);
+    });
+    print(json.encode(schedulelist[0]));
+  }
+
   @override
   initState() {
     _calendarController = CalendarController();
@@ -43,142 +48,222 @@ class SchedulerState extends State<Scheduler> {
 
   @override
   Widget build(BuildContext context) {
-    user_id = ModalRoute.of(context).settings.arguments;
-
+    user_id = ModalRoute
+        .of(context)
+        .settings
+        .arguments;
+    if (flag) {
+      flag = false;
+      fetchSchedules();
+    }
 
     return Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            title: Text('Scheduler', style: GoogleFonts.josefinSans()),
-              actions: <Widget>[FlatButton(
-                textColor: Colors.white,
-                disabledColor: Colors.grey,
-                disabledTextColor: Colors.black,
-                padding: EdgeInsets.all(2.0),
-                onPressed: () {
-                  // Navigator.of(context)
-                  //     .pushNamed(
-                  //   "addTask",
-                  //   // we are passing a value to the settings page
-                  //   //arguments: '${user['username']}',
-                  // );
-                },
-                child: Text(
-                  "Add Shift",
-                  style: GoogleFonts.josefinSans( textStyle: TextStyle(fontSize: 16.0)),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        title: Text('Scheduler', style: GoogleFonts.josefinSans(
+            textStyle: TextStyle(foreground: Paint()
+              ..shader = linearGradient,
+                fontSize: 25, fontWeight: FontWeight.bold))),
+        actions: <Widget>[FlatButton(
+          textColor: Colors.white,
+          disabledColor: Colors.grey,
+          disabledTextColor: Colors.black,
+          padding: EdgeInsets.all(2.0),
+          onPressed: () {
+            // Navigator.of(context)
+            //     .pushNamed(
+            //   "addShift",
+            //   // we are passing a value to the settings page
+            //   //arguments: '${user['username']}',
+            // );
+          },
+          child: Text(
+            "Add Shift",
+            style: GoogleFonts.josefinSans(
+                textStyle: TextStyle(foreground: Paint()
+                  ..shader = linearGradient,
+                    fontSize: 18, fontWeight: FontWeight.bold)),
+          ),
+        ),
+          //button to navigate calendar dates
+          IconButton(icon: Icon(Icons.arrow_forward),
+            onPressed: () {
+              _calendarController.forward();
+            },
+          )
+        ],
+      ),
+      body: SfCalendar(
+        headerHeight: 60,
+        viewHeaderHeight: 50,
+        view: CalendarView.month,
+        showDatePickerButton: true,
+        allowedViews: <CalendarView>
+        [
+          CalendarView.day,
+          CalendarView.week,
+          CalendarView.month,
+          CalendarView.schedule
+        ],
+        controller: _calendarController,
+        dataSource: _calendarDataSource(),
+      ),
+      bottomNavigationBar: new Container(
+        //height: 60.0,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 5,
+                blurRadius: 7,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          height: 60.0,
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: IconButton(
+
+                  icon: Icon(Icons.logout),
+                  color: Colors.purple,
+                  onPressed: () {
+                    Navigator.of(context).pushReplacementNamed("signIn");
+                  },
                 ),
               ),
-              //button to navigate calendar dates
-              IconButton(icon: Icon(Icons.arrow_forward),
-                onPressed: () {
-                _calendarController.forward();
-              },
-            )],
-          ),
-          body: SfCalendar(
-            headerHeight: 60,
-            viewHeaderHeight: 50,
-            view: CalendarView.month,
-            showDatePickerButton: true,
-            allowedViews: <CalendarView>
-            [
-              CalendarView.day,
-              CalendarView.week,
-              CalendarView.month,
-              CalendarView.schedule
-            ],
-            controller: _calendarController,
-            dataSource: _getDataSource(),
-          ),
-          bottomNavigationBar: new Container(
-              //height: 60.0,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 5,
-                  blurRadius: 7,
-                  offset: Offset(0,3),
+              Expanded(
+                //Task button - bold font and darker
+                child: FlatButton(
+                  textColor: Colors.white,
+                  height: 60,
+                  color: Colors.white,
+                  onPressed: () {
+                    Navigator.of(context) //Add arguments? throws error
+                        .pushReplacementNamed(
+                      "taskManager",
+                      // we are passing a value to the settings page
+
+                    );
+                  },
+                  child: Text('Tasks',
+                      style: GoogleFonts.josefinSans(
+                          foreground: Paint()
+                            ..shader = linearGradient,
+                          fontSize: 18, fontWeight: FontWeight.w500),
+                      textAlign: TextAlign.center),
                 ),
-              ],
-            ),
-              height: 60.0,
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    //Task button - bold font and darker
-                    child: MaterialButton(
-                      color: Color(0xfff3a2755),
-                      textColor: Colors.white,
-                      height: 60,
-                      onPressed: () {
-                        Navigator.of(context) //Add arguments? throws error
-                            .pushReplacementNamed(
-                          "taskManager",
-                          // we are passing a value to the settings page
-
-                        );
-                      },
-                      child: Text('Tasks',
-                          style: TextStyle(fontSize: 18 ), textAlign: TextAlign.center),
-                    ),
-                  ),
-                  Expanded(
-                    //Scheduling button - normal font and lighter
-                    child: MaterialButton(
-                      color: Color(0xfff74c83),
-                      textColor: Colors.white,
-                      height: 60,
-                      onPressed: () { //navigate to scheduling widget
-                       //nothing
-                      },
-                      child: Text('Schedules',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-                          ,textAlign: TextAlign.center),
-                    ),
-                  ),
-                ],
-              )
-          ),
-        );
+              ),
+              Expanded(
+                //Scheduling button - normal font and lighter
+                child: FlatButton(
+                  textColor: Colors.white,
+                  color: Colors.white,
+                  height: 60,
+                  onPressed: () { //navigate to scheduling widget
+                    //nothing
+                  },
+                  child: Text('Scheduler',
+                      style: GoogleFonts.josefinSans(
+                          textStyle: TextStyle(
+                              foreground: Paint()
+                                ..shader = linearGradient,
+                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      textAlign: TextAlign.center),
+                ),
+              ),
+            ],
+          )
+      ),
+    );
   }
 
-  _DataSource _getDataSource() {
-    final List<Appointment> appointments = <Appointment>[];
-    appointments.add(Appointment(
-      startTime: DateTime(2020, 10, 16, 7),
-      endTime: DateTime(2020, 10, 16, 11),
-      subject: 'Hostess',
-      color: Colors.lightBlueAccent,
-    ));
-    appointments.add(Appointment(
-      startTime: DateTime(2020, 10, 15, 10),
-      endTime: DateTime(2020, 10, 15, 16),
-      subject: 'Server - patio',
-      color: Colors.greenAccent,
-    ));
-    appointments.add(Appointment(
-      startTime: DateTime(2020, 10, 12, 8),
-      endTime: DateTime(2020, 10, 12, 12),
-      subject: 'Server - section 3',
-      color: Colors.cyanAccent,
-    ));
-    appointments.add(Appointment(
-      startTime: DateTime(2020, 10, 12, 12, 15),
-      endTime: DateTime(2020, 10, 12, 16),
-      subject: 'Delivery',
-      color: Color(0xFFf3282b8),
-    ));
+  final Shader linearGradient = LinearGradient(
+    colors: <Color>[Color(0xffDA44bb), Color(0xff8921aa)],
+  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 
-    return _DataSource(appointments);
+
+  _DataSource _calendarDataSource() {
+    ShiftDataSource(List<Schedule> source) {
+      schedulelist = source;
+    }
   }
 }
-
 class _DataSource extends CalendarDataSource {
-  _DataSource(List<Appointment> source) {
-    appointments = source;
+  List<Schedule> schedulelist = new List<Schedule>();
+  Future fetchSchedules() async {
+    final uri = Uri.http(global.ip, '/shifts');
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = await http.get(uri, headers: headers);
+
+    //setState(() {
+      schedulelist = (json.decode(response.body) as List).map((i) =>
+          Schedule.fromJson(i)).toList();
+      // for (int i = 0; i < schedulelist.length; i++)
+        // _isExpanded.add(false);
+    //}
+
+    print(json.encode(schedulelist[0]));
   }
+  _DataSource(List<Schedule> source) {
+    schedulelist = source;
+  }
+
+  // @override
+  // bool isAllDay(int index) => schedulelist[index].isAllDay;
+
+  @override
+  String getSubject(int index) => schedulelist[index].assignedTo;
+
+  // @override
+  // String getStartTimeZone(int index) => appointments[index].startTimeZone;
+
+  // @override
+  // String getNotes(int index) => appointments[index].description;
+
+  // @override
+  // String getEndTimeZone(int index) => appointments[index].endTimeZone;
+
+  // @override
+  // Color getColor(int index) => schedulelist[index].color;
+
+  @override
+  DateTime getStartTime(int index) {
+    var startTime = new DateTime.fromMicrosecondsSinceEpoch(int.parse(schedulelist[index].startTime));
+    return startTime;
+  }
+
+
+  @override
+  DateTime getEndTime(int index) {
+    var endTime = new DateTime.fromMicrosecondsSinceEpoch(int.parse(schedulelist[index].endTime));
+    return endTime;
+  }
+
+}
+class Meeting {
+  Meeting(
+      {@required this.from,
+        @required this.to,
+        this.background = Colors.green,
+        this.isAllDay = false,
+        this.eventName = '',
+        this.startTimeZone = '',
+        this.endTimeZone = '',
+        this.description = ''});
+
+  final String eventName;
+  final DateTime from;
+  final DateTime to;
+  final Color background;
+  final bool isAllDay;
+  final String startTimeZone;
+  final String endTimeZone;
+  final String description;
 }
 
-//
+
+
