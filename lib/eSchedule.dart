@@ -13,6 +13,7 @@ import 'SubTasks.dart';
 import 'package:item_selector/item_selector.dart';
 import 'Schedule.dart';
 import 'package:intl/intl.dart';
+import 'Trade.dart';
 
 class eSchedule extends StatefulWidget {
   @override
@@ -24,6 +25,7 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
   List<Schedule> userSlist = new List<Schedule>();
 
   List<Schedule> otherlist = new List<Schedule>();
+  List<Trade> tradelist = new List<Trade>();
   bool flag = true;
 
   List<bool> _isExpanded = new List<bool>();
@@ -67,6 +69,55 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
 
   }
 
+  Future fetchTrades() async{
+
+    final uri = Uri.http(global.ip, '/trades/' + user_id);
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = await http.get(uri, headers: headers);
+
+    setState(() {
+      tradelist=(json.decode(response.body) as List).map((i) =>
+         Trade.fromJson(i)).toList();
+    });
+
+  }
+
+  Future execTrade(x) async{
+
+    final uri = Uri.http(global.ip, '/execTrade/' + tradelist[x].sId);
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = await http.get(uri, headers: headers);
+
+    setState(() {
+      fetchShifts_user();
+      fetchShifts_other();
+      fetchTrades();
+    });
+
+  }
+
+  Future postTrade(BuildContext context) async{
+
+    final body = {
+      'startTime': userSlist[ui].startTime,
+      'endTime': userSlist[ui].endTime,
+      'assignedTo': userSlist[ui].assignedTo,
+      'uid': userSlist[ui].sId,
+      'startTime2': otherlist[oi].startTime,
+      'endTime2': otherlist[oi].endTime,
+      'assignedTo2': otherlist[oi].assignedTo,
+      'oid': otherlist[oi].sId
+    };
+
+    final jsonString = json.encode(body);
+    final uri = Uri.http(global.ip, '/addTrade');
+    final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
+    final response = http.post(uri, headers: headers, body: jsonString);
+
+    setState(() {
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -86,8 +137,10 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
   Future<void> _handleRefresh() async
   {
     setState(() {
+
       fetchShifts_user();
       fetchShifts_other();
+      fetchTrades();
     });
   }
 
@@ -103,6 +156,7 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
       flag = false;
       fetchShifts_user();
       fetchShifts_other();
+      fetchTrades();
     }
 
 
@@ -132,6 +186,17 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
 
       ),
       //navigation bar to switch to scheduling
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          if(ui>= 0 && oi >= 0) postTrade(context);
+          _handleRefresh();
+          // Add your onPressed code here!
+        },
+        label: Text('Request',
+            style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold , color: Colors.white)),
+            textAlign: TextAlign.center),
+        backgroundColor: Colors.purple,
+      ),
       bottomNavigationBar: new Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -372,7 +437,7 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
 
   Widget trades(){
 
-    int item_count = userSlist.length;
+    int item_count = tradelist.length;
     return ItemSelectionController(
       child: ListView(
         // scrollDirection: Axis.horizontal,
@@ -392,9 +457,11 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
                 );
               }
               index-= 1;
-              if(selected) ui = index;
-              DateTime sdate = new DateTime.fromMillisecondsSinceEpoch(int.parse(userSlist[index].startTime));
-              DateTime edate = new DateTime.fromMillisecondsSinceEpoch(int.parse(userSlist[index].endTime));
+              DateTime sdate = new DateTime.fromMillisecondsSinceEpoch(int.parse(tradelist[index].startTime));
+              DateTime edate = new DateTime.fromMillisecondsSinceEpoch(int.parse(tradelist[index].endTime));
+
+              DateTime sdate2 = new DateTime.fromMillisecondsSinceEpoch(int.parse(tradelist[index].startTime2));
+              DateTime edate2 = new DateTime.fromMillisecondsSinceEpoch(int.parse(tradelist[index].endTime2));
 
               var format = new DateFormat("y-M-d hh:mm");
 
@@ -430,7 +497,7 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
                   ),
                   child: Column(
                     children: <Widget>[SizedBox(height: 5,),
-                      Text("You" ,
+                      Text(tradelist[index].assignedTo ,
                           style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white))),
                       SizedBox(height: 3,),
                       Text( format.format(sdate),
@@ -444,28 +511,30 @@ class _eScheduleState extends State<eSchedule> with TickerProviderStateMixin {
                       Divider(
                           color: Colors.white
                       ),
-                      Text("You" ,
+                      Text(tradelist[index].assignedTo2 ,
                           style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white))),
                       SizedBox(height: 3,),
-                      Text( format.format(sdate),
+                      Text( format.format(sdate2),
                           style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white))),
                       SizedBox(height: 3,),
                       Text("to",
                           style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white70))),
                       SizedBox(height: 3,),
-                      Text(format.format(edate),
+                      Text(format.format(edate2),
                           style: GoogleFonts.josefinSans( textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white))),
                       Divider(
                           color: Colors.white
                       ),
                       FlatButton(
-                          child: Text("Accept", style: TextStyle(color: Colors.white)),
+                          child: (tradelist[index].assignedTo!=user_id)?
+                          Text("Accept", style: TextStyle(color: Colors.white)):
+                          Text("Pending", style: TextStyle(color: Colors.white)),
 
-                          color: Colors.green,
-                          onPressed: (){
-                            print(ui);
-                            print(oi);
-                          },
+                          color: (tradelist[index].assignedTo!=user_id)?Colors.green:Colors.grey,
+                          onPressed: (tradelist[index].assignedTo!=user_id)?(){
+                            execTrade(index);
+                            _handleRefresh();
+                          }: () {},
                           shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0))
                       ),
                       SizedBox(height: 5,)
