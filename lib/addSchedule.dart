@@ -154,28 +154,22 @@ class _AddScheduleState extends State<AddSchedule> {
   }
 
   Future postSchedule(BuildContext context) async{
+    print(_dateController.text);
+    DateTime start = DateFormat("MM/dd/yyyy hh:mm a").parse(_dateController.text + " " + _timeController.text);
+    DateTime end = DateFormat("MM/dd/yyyy hh:mm a").parse(_dateController2.text + " " + _timeController2.text);
 
-    if(subTasks[0].text == ""){
-      return;}
-    List<SubTasks> st_list = new List<SubTasks>();
-    for(int i=0;i<subTasks.length;i++){
-      SubTasks temp = new SubTasks();
-      temp.stDesc = subTasks[i].text;
-      temp.completed = false;
-      st_list.add(temp);
-    }
+    print(start.microsecondsSinceEpoch);
+    print(end.millisecondsSinceEpoch);
 
     final body = {
-      'subTasks': st_list,
-      'status': 'incomplete',
-      'assigned': dropdownValue
+      'startTime': (start.millisecondsSinceEpoch).toString(),
+      'endTime': (end.millisecondsSinceEpoch).toString(),
+      'assignedTo': dropdownValue
     };
 
     final jsonString = json.encode(body);
-    final uri = Uri.http(global.ip, '/addTask');
+    final uri = Uri.http(global.ip, '/addShift');
     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
-    print(json.encode(st_list));
-    print(jsonString);
     final response = http.post(uri, headers: headers, body: jsonString);
 
     Navigator.of(context).pop();
@@ -429,8 +423,7 @@ class _AddScheduleState extends State<AddSchedule> {
         child: FlatButton(
           color: Colors.transparent,
           onPressed: () {
-            print(_dateController2.text);
-            print(_timeController2.text);
+            postSchedule(context);
           },
           child: Text('Submit', style: GoogleFonts.josefinSans(textStyle: TextStyle(fontSize: 20, color: Colors.white,fontWeight: FontWeight.bold))),
         ),

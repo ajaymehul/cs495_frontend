@@ -40,11 +40,20 @@ class SchedulerState extends State<Scheduler> {
     print(json.encode(schedulelist[0]));
   }
 
+  Future<void> _handleRefresh() async
+  {
+    await fetchSchedules();
+    setState(() {
+
+    });
+  }
+
   @override
   initState() {
     _calendarController = CalendarController();
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +82,9 @@ class SchedulerState extends State<Scheduler> {
                      "addSchedule",
                      // we are passing a value to the settings page
                     //arguments: '${user['username']}',
-                   );
+                   ).then((value){
+                     fetchSchedules();
+                   });
                 },
                 child: Text(
                   "Add Shift",
@@ -88,21 +99,21 @@ class SchedulerState extends State<Scheduler> {
             )],
 
       ),
-      body: SfCalendar(
+      body: RefreshIndicator(
+    child: SfCalendar(
         headerHeight: 60,
         viewHeaderHeight: 50,
         view: CalendarView.month,
         showDatePickerButton: true,
         allowedViews: <CalendarView>
         [
-          CalendarView.day,
-          CalendarView.week,
-          CalendarView.month,
-          CalendarView.schedule
+          CalendarView.week
         ],
         controller: _calendarController,
         dataSource: _calendarDataSource(),
       ),
+        onRefresh: () => _handleRefresh(),
+    ),
       bottomNavigationBar: new Container(
         //height: 60.0,
           decoration: BoxDecoration(
@@ -187,20 +198,12 @@ class SchedulerState extends State<Scheduler> {
       print(DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].startTime)*1000));
       print(DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].endTime)));
       appointments.add(Appointment(
-        startTime: new DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].startTime)*1000),
-        endTime: new DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].endTime)*1000),
+        startTime: new DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].startTime)),
+        endTime: new DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].endTime)),
         subject: schedulelist[i].assignedTo,
         color: Colors.blue
       ));
     }
-
-    appointments.add(Appointment(
-      startTime: DateTime(2020, 12, 12, 12, 15),
-      endTime: DateTime(2020, 12, 12, 16, 15),
-      subject: 'Delivery',
-      color: Color(0xFFf3282b8),
-    ));
-
 
     return _DataSource(appointments);
   }

@@ -157,9 +157,8 @@ class _eViewState extends State<EmployeeView> with TickerProviderStateMixin {
                   onPressed: () { //navigate to scheduling widget
                     Navigator.of(context)
                         .pushReplacementNamed(
-                      "scheduler",
-                      // we are passing a value to the settings page
-
+                      "eSchedule",
+                      arguments: user_id,
                     );
                   },
                   child: Text('Schedules', style: GoogleFonts.josefinSans(foreground: Paint()..shader = linearGradient, fontSize: 18, fontWeight: FontWeight.w500),textAlign: TextAlign.center),
