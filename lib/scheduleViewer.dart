@@ -181,135 +181,40 @@ class SchedulerState extends State<Scheduler> {
 
 
   _DataSource _calendarDataSource() {
-    List<Schedule> schedulelist = new List<Schedule>();
-    Future fetchSchedules() async {
-      final uri = Uri.http(global.ip, '/shifts');
-      final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
-      final response = await http.get(uri, headers: headers);
+    final List<Appointment> appointments = <Appointment>[];
 
-      // setState(() {
-      schedulelist = (json.decode(response.body) as List).map((i) =>
-          Schedule.fromJson(i)).toList();
-      // for (int i = 0; i < schedulelist.length; i++)
-      // _isExpanded.add(false);
-      // }
-
-      print(json.encode(schedulelist[0]));
-    }
-    // _DataSource(List<Schedule> source) {
-    //   schedulelist = source;
-    // }
-
-    // @override
-    // bool isAllDay(int index) => schedulelist[index].isAllDay;
-    fetchSchedules();
-    @override
-    String getSubject(int index) => schedulelist[index].assignedTo;
-
-    // @override
-    // String getStartTimeZone(int index) => appointments[index].startTimeZone;
-
-    // @override
-    // String getNotes(int index) => appointments[index].description;
-
-    // @override
-    // String getEndTimeZone(int index) => appointments[index].endTimeZone;
-
-    // @override
-    // Color getColor(int index) => schedulelist[index].color;
-
-    @override
-    DateTime getStartTime(int index) {
-      var startTime = new DateTime.fromMicrosecondsSinceEpoch(int.parse(schedulelist[index].startTime));
-      return startTime;
+    for(int i=0; i<schedulelist.length;i++){
+      print(DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].startTime)*1000));
+      print(DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].endTime)));
+      appointments.add(Appointment(
+        startTime: new DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].startTime)*1000),
+        endTime: new DateTime.fromMillisecondsSinceEpoch(int.parse(schedulelist[i].endTime)*1000),
+        subject: schedulelist[i].assignedTo,
+        color: Colors.blue
+      ));
     }
 
-    @override
-    DateTime getEndTime(int index) {
-      var endTime = new DateTime.fromMicrosecondsSinceEpoch(int.parse(schedulelist[index].endTime));
-      return endTime;
-    }
-    return _DataSource(schedulelist);
+    appointments.add(Appointment(
+      startTime: DateTime(2020, 12, 12, 12, 15),
+      endTime: DateTime(2020, 12, 12, 16, 15),
+      subject: 'Delivery',
+      color: Color(0xFFf3282b8),
+    ));
+
+
+    return _DataSource(appointments);
   }
+
+
+
 }
 
 class _DataSource extends CalendarDataSource {
-  _DataSource(List<Schedule> source) {
+  _DataSource(List<Appointment> source) {
     appointments = source;
   }
 }
-// class _DataSource extends CalendarDataSource {
-//   List<Schedule> schedulelist = new List<Schedule>();
-//   Future fetchSchedules() async {
-//     final uri = Uri.http(global.ip, '/shifts');
-//     final headers = {HttpHeaders.contentTypeHeader: 'application/json'};
-//     final response = await http.get(uri, headers: headers);
-//
-//     //setState(() {
-//       schedulelist = (json.decode(response.body) as List).map((i) =>
-//           Schedule.fromJson(i)).toList();
-//       // for (int i = 0; i < schedulelist.length; i++)
-//         // _isExpanded.add(false);
-//     //}
-//
-//     print(json.encode(schedulelist[0]));
-//   }
-//   _DataSource(List<Schedule> source) {
-//     schedulelist = source;
-//   }
-//
-//   // @override
-//   // bool isAllDay(int index) => schedulelist[index].isAllDay;
-//
-//   @override
-//   String getSubject(int index) => schedulelist[index].assignedTo;
-//
-//   // @override
-//   // String getStartTimeZone(int index) => appointments[index].startTimeZone;
-//
-//   // @override
-//   // String getNotes(int index) => appointments[index].description;
-//
-//   // @override
-//   // String getEndTimeZone(int index) => appointments[index].endTimeZone;
-//
-//   // @override
-//   // Color getColor(int index) => schedulelist[index].color;
-//
-//   @override
-//   DateTime getStartTime(int index) {
-//     var startTime = new DateTime.fromMicrosecondsSinceEpoch(int.parse(schedulelist[index].startTime));
-//     return startTime;
-//   }
-//
-//
-//   @override
-//   DateTime getEndTime(int index) {
-//     var endTime = new DateTime.fromMicrosecondsSinceEpoch(int.parse(schedulelist[index].endTime));
-//     return endTime;
-//   }
-//
-// }
-class Meeting {
-  Meeting(
-      {@required this.from,
-        @required this.to,
-        this.background = Colors.green,
-        this.isAllDay = false,
-        this.eventName = '',
-        this.startTimeZone = '',
-        this.endTimeZone = '',
-        this.description = ''});
 
-  final String eventName;
-  final DateTime from;
-  final DateTime to;
-  final Color background;
-  final bool isAllDay;
-  final String startTimeZone;
-  final String endTimeZone;
-  final String description;
-}
 
 
 

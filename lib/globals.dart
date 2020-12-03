@@ -1,4 +1,4 @@
 library my_prj.globals;
 
-String ip = "10.0.0.251:3003";
+String ip = "192.168.0.11:3004";
 
